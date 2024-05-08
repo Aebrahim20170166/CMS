@@ -64,8 +64,21 @@ class EnrollmentService {
 
     public function getEnrolledStudent(Request $request)
     {
+        $userRole = $request->user()->role->name;
+        if ($userRole !== "instructor")
+        {
+            return $this->returnError(ResponseAlias::HTTP_BAD_REQUEST, "You Are Not Allowed");
+        }
         $course = Course::find($request->course_id);
-        $students = $course->users;
+        $users = $course->users;
+        $students = [];
+        foreach($users as $user)
+        {
+            if ($user->role->name == 'student')
+            {
+                $students[] = $user;
+            }
+        }
         return $this->returnData('students', $students, "All Enrolled Students in $course->name course");
         // return response()->json([
         //     "status" => true,
